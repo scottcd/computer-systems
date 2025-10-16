@@ -113,33 +113,6 @@ void combine6(int *vec, int *dest) {
 }
 
 /* ============================================
-   VERSION 7: POINTER INCREMENT (bonus)
-   Replace array indexing with pointer arithmetic
-   ============================================ */
-void combine7(int *vec, int *dest) {
-    int length = N;
-    int acc0 = 0, acc1 = 0, acc2 = 0, acc3 = 0;
-    int *ptr = vec;
-    int *end = vec + length - 3;
-    
-    // Process 4 elements at a time with pointer increment
-    while (ptr < end) {
-        acc0 = acc0 + *ptr++;
-        acc1 = acc1 + *ptr++;
-        acc2 = acc2 + *ptr++;
-        acc3 = acc3 + *ptr++;
-    }
-    
-    // Handle leftover
-    end = vec + length;
-    while (ptr < end) {
-        acc0 = acc0 + *ptr++;
-    }
-    
-    *dest = (acc0 + acc1) + (acc2 + acc3);
-}
-
-/* ============================================
    TIMING AND PROFILING
    ============================================ */
 double time_function(void (*func)(int*, int*), int *vec, int *dest, int iterations) {
@@ -163,7 +136,6 @@ int main() {
     
     int iterations = 1000;
     
-    printf("CSAPP Chapter 5 - Code Optimization\n");
     printf("Computing sum of %d elements, %d iterations\n\n", N, iterations);
     
     double t1 = time_function(combine1, vec, &dest, iterations);
@@ -176,16 +148,13 @@ int main() {
     printf("Version 3 (Reduce Calls):       %.4f sec  (%.2fx speedup)\n", t3, t1/t3);
     
     double t4 = time_function(combine4, vec, &dest, iterations);
-    printf("Version 4 (Eliminate Mem Ref):  %.4f sec  (%.2fx speedup) *** KEY\n", t4, t1/t4);
+    printf("Version 4 (Eliminate Mem Ref):  %.4f sec  (%.2fx speedup)\n", t4, t1/t4);
     
     double t5 = time_function(combine5, vec, &dest, iterations);
     printf("Version 5 (Loop Unroll 2x):     %.4f sec  (%.2fx speedup)\n", t5, t1/t5);
     
     double t6 = time_function(combine6, vec, &dest, iterations);
     printf("Version 6 (Loop Unroll 4x):     %.4f sec  (%.2fx speedup)\n", t6, t1/t6);
-    
-    double t7 = time_function(combine7, vec, &dest, iterations);
-    printf("Version 7 (Pointer Increment):  %.4f sec  (%.2fx speedup)\n", t7, t1/t7);
     
     printf("\nFinal result: %d\n", dest);
     
@@ -220,12 +189,7 @@ int main() {
       - Modern CPUs have ~4-6 functional units
       - Diminishing returns after 4x-8x
    
-   5. POINTER INCREMENT (v6 -> v7)
-      - Eliminates index multiplication (i in vec[i])
-      - Pointer++ is one instruction
-      - Compiler usually does this at -O2+
-   
-   6. PROFILING
+   5. PROFILING
       - Measure with: perf stat -e cycles,instructions ./program
       - Look at CPI (cycles per instruction)
       - v1-v3: high CPI from memory stalls
